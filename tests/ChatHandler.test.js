@@ -7,45 +7,45 @@ describe("ChatHandler", () => {
       /^(?<chatType>\w+) > (?:(?:\[(?<rank>[^\]]+)\] )?(?:(?<username>\w+)(?: \[(?<guildRank>[^\]]+)\])?: )?)?(?<message>.+)$/;
 
     it("should match a regular message", () => {
-      const message = "Guild > [MVP+] DuckySoLucky [Staff]: Test Message";
+      const message = "Guild > [MVP+] Withercloak [GM]: Test Message";
       const match = message.match(regex);
       expect(match).toBeTruthy();
       expect(match.groups.chatType).toBe("Guild");
       expect(match.groups.rank).toBe("MVP+");
-      expect(match.groups.username).toBe("DuckySoLucky");
+      expect(match.groups.username).toBe("Withercloak");
       expect(match.groups.guildRank).toBe("Staff");
       expect(match.groups.message).toBe("Test Message");
     });
 
     it("should match a message with rank but without guild rank", () => {
-      const message = "Guild > [MVP+] DuckySoLucky: Test Message";
+      const message = "Guild > [MVP+] Withercloak: Test Message";
       const match = message.match(regex);
       expect(match).toBeTruthy();
       expect(match.groups.chatType).toBe("Guild");
       expect(match.groups.rank).toBe("MVP+");
-      expect(match.groups.username).toBe("DuckySoLucky");
+      expect(match.groups.username).toBe("Withercloak");
       expect(match.groups.guildRank).toBeUndefined();
       expect(match.groups.message).toBe("Test Message");
     });
 
     it("should match a message without rank but with guild rank", () => {
-      const message = "Guild > DuckySoLucky [Staff]: Test Message";
+      const message = "Guild > Withercloak [GM]: Test Message";
       const match = message.match(regex);
       expect(match).toBeTruthy();
       expect(match.groups.chatType).toBe("Guild");
       expect(match.groups.rank).toBeUndefined();
-      expect(match.groups.username).toBe("DuckySoLucky");
+      expect(match.groups.username).toBe("Withercloak");
       expect(match.groups.guildRank).toBe("Staff");
       expect(match.groups.message).toBe("Test Message");
     });
 
     it("should match a message without rank or guild rank", () => {
-      const message = "Guild > DuckySoLucky: Test Message";
+      const message = "Guild > Withercloak: Test Message";
       const match = message.match(regex);
       expect(match).toBeTruthy();
       expect(match.groups.chatType).toBe("Guild");
       expect(match.groups.rank).toBeUndefined();
-      expect(match.groups.username).toBe("DuckySoLucky");
+      expect(match.groups.username).toBe("Withercloak");
       expect(match.groups.guildRank).toBeUndefined();
       expect(match.groups.message).toBe("Test Message");
     });
@@ -113,7 +113,7 @@ describe("ChatHandler", () => {
     });
 
     it("should return false for an invalid Discord message", () => {
-      const messages = ["DuckySoLucky message", "yeah i agree", "bro you're so bad", "test false: message"];
+      const messages = ["Withercloak message", "yeah i agree", "bro you're so bad", "test false: message"];
       for (const message of messages) {
         expect(chatHandler.isDiscordMessage(message)).toBe(false);
       }
