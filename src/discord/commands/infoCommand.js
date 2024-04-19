@@ -62,8 +62,8 @@ module.exports = {
         }
       )
       .setFooter({
-        text: "by @duckysolucky | /help [command] for more information",
-        iconURL: "https://imgur.com/tgwQJTX.png",
+        text: "by @withercloak | /help [command] for more information",
+        iconURL: "https://i.imgur.com/eboO5Do.png",
       });
     await interaction.followUp({ embeds: [infoEmbed] });
   },

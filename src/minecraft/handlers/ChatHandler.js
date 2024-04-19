@@ -195,8 +195,8 @@ class StateHandler extends eventHandler {
             )
             .setThumbnail(`https://www.mc-heads.net/avatar/${player.nickname}`)
             .setFooter({
-              text: `by @duckysolucky | /help [command] for more information`,
-              iconURL: "https://imgur.com/tgwQJTX.png",
+              text: `by @withercloak | /help [command] for more information`,
+              iconURL: "https://i.imgur.com/eboO5Do.png",
             });
 
           await client.channels.cache.get(`${config.discord.channels.loggingChannel}`).send({ embeds: [statsEmbed] });
@@ -239,7 +239,7 @@ class StateHandler extends eventHandler {
       bot.chat(
         `/gc ${replaceVariables(messages.guildJoinMessage, {
           prefix: config.minecraft.bot.prefix,
-        })} | by @duckysolucky`
+        })} | by @withercloak`
       );
       return [
         this.minecraft.broadcastHeadedEmbed({

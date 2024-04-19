@@ -121,7 +121,7 @@ class MessageHandler {
 
     const hasMentions = /<@|<#|<:|<a:/.test(message);
     if (hasMentions) {
-      // Replace <@486155512568741900> with @DuckySoLucky
+      // Replace <@729688465041522718> with @Withercloak
       const userMentionPattern = /<@(\d+)>/g;
       const replaceUserMention = (match, mentionedUserId) => {
         const mentionedUser = message.guild.members.cache.get(mentionedUserId);
