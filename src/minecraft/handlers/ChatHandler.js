@@ -9,6 +9,8 @@ const messages = require("../../../messages.json");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 const Logger = require("../../Logger.js");
+const { publishMessage, subscribeToChannel} = require('../../../API/utils/redisClient.js');
+
 
 class StateHandler extends eventHandler {
   constructor(minecraft, command, discord) {
@@ -21,11 +23,59 @@ class StateHandler extends eventHandler {
   registerEvents(bot) {
     this.bot = bot;
     this.bot.on("message", (message) => this.onMessage(message));
+
+    // Set to store processed message IDs
+const processedMessageIds = new Set();
+const BOT_IDENTIFIER = '★';
+  
+    // Function to process incoming messages
+function handleRedisMessage(messageId, message, colouredMessage) {
+  // Check if the message has already been processed
+  if (processedMessageIds.has(messageId)) {
+    return;
+  }
+
+   // Check if the message was sent by the bot
+   if (message.includes(BOT_IDENTIFIER)) {
+    return;
+  }
+
+  // Add the message ID to the set of processed messages
+  processedMessageIds.add(messageId);
+
+   
+// Cut the message to include everything after the first "]"
+const cutMessage = (() => {
+  const regex = /\](.*)/;
+  const match = message.match(regex);
+  return match ? match[1].trim() : message;
+})();
+
+    console.log('Message cut to start after "]:":', cutMessage);
+
+  // Send the cut message to the in-game chat with the bot identifier
+  bot.chat(`/gc ${cutMessage} ${BOT_IDENTIFIER}`);
+
+}
+    // Move the subscription to the registration phase
+    const subChannel = 'sbrplus-bridge';
+    subscribeToChannel(subChannel, handleRedisMessage, this.bot); // Pass the bot instance to the subscriber
+
   }
 
   async onMessage(event) {
     const message = event.toString();
     const colouredMessage = event.toMotd();
+
+// Define the Redis channel
+const pubChannel = 'sbr-bridge';
+
+publishMessage(pubChannel, message, colouredMessage);
+
+
+  // Further processing of the message
+  // For example, you can use the bot.chat function to send the message content
+  // bot.chat(`/gc ${message}`);
 
     // NOTE: fixes "100/100❤     100/100✎ Mana" spam in the debug channel
     if (message.includes("✎ Mana") && message.includes("❤") && message.includes("/")) {
