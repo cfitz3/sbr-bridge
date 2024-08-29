@@ -1,7 +1,7 @@
 const redis = require('redis');
 const { v4: uuidv4 } = require('uuid');
 
-const processedMessageIds = new Set(); // Ensure this is defined at the top of your file
+const processedMessageIds = new Set();
 
 // Create Redis clients for publishing and subscribing
 const redisPublisherClient = redis.createClient({
@@ -55,43 +55,90 @@ async function publishMessage(channel, message, colouredMessage) {
       const payload = JSON.stringify({ messageId, message, colouredMessage });
       const reply = await redisPublisherClient.publish(channel, payload);
       console.log(`Message published to Redis channel '${channel}': ${reply}`);
-      console.log(`Message ID: ${payload}`);
+
     } catch (err) {
       console.error('Error publishing message to Redis:', err);
     }
   }
 }
 
+// Function to handle invite messages
+async function handleInviteTrigger(username) {
+  try {
+    bot.chat(`/g invite ${username}`);
+    
+    console.log(`Successfully invited ${username} to the guild.`);
+  } catch (error) {
+    console.error('Error inviting user:', error);
+  }
+}
+
 // Function to process incoming messages
 function handleRedisMessage(messageId, message, colouredMessage) {
   if (processedMessageIds.has(messageId)) {
-    return; // If the message has already been processed, skip further processing
+    return; 
   }
-
-  // Log the parsed message for debugging
-  console.log('Received message from Redis:', { messageId, message, colouredMessage });
 
   // Mark the message as processed to avoid handling it again
   processedMessageIds.add(messageId);
 }
 
-// Function to subscribe to a Redis channel and handle incoming messages
+// Function to handle messages for invites
+function handleInviteMessage(messageId, triggerkeyword, username ) {
+  if (processedMessageIds.has(messageId)) {
+    return; 
+  }
+
+
+  try {
+    const parsedPayload = { messageId, triggerkeyword, username }
+  
+    if (parsedPayload.triggerkeyword === 'invite') {
+      handleInviteTrigger(parsedPayload.username); 
+    } else {
+      console.log('Unhandled trigger:', parsedPayload.triggerkeyword);
+    }
+  } catch (error) {
+    console.error('Error processing Redis invite message:', error);
+  }
+  processedMessageIds.add(messageId);
+}
+
+// Subscribe to a Redis channel and handle incoming messages
 async function subscribeToChannel(channel, messageHandler) {
   try {
     if (!redisSubscriberClient.isOpen) {
       await redisSubscriberClient.connect();
     }
     await redisSubscriberClient.subscribe(channel, (message) => {
-      console.log('Payload Received:', message);
       try {
-        const parsedPayload = JSON.parse(message); // Parse the incoming message JSON
-        messageHandler(parsedPayload.messageId, parsedPayload.message, parsedPayload.colouredMessage); // Call the handler
+        const parsedPayload = JSON.parse(message); 
+        messageHandler(parsedPayload.messageId, parsedPayload.message, parsedPayload.colouredMessage); 
       } catch (parseError) {
-        console.error('Error parsing message:', parseError); // Handle JSON parse errors
+        console.error('Error parsing message:', parseError);
       }
     });
   } catch (err) {
-    console.error('Redis connection error:', err); // Handle Redis connection errors
+    console.error('Redis connection error:', err); 
+  }
+}
+
+// Subscribe to a specific channel for invite triggers
+async function subscribeToInviteChannel(channel) {
+  try {
+    if (!redisSubscriberClient.isOpen) {
+      await redisSubscriberClient.connect();
+    }
+    await redisSubscriberClient.subscribe(channel, (message) => {
+      try {
+        const parsedPayload = JSON.parse(message); 
+        handleInviteMessage(parsedPayload.messageId, parsedPayload.triggerKeyword, parsedPayload.username); // Call the handler for invite messages
+      } catch (parseError) {
+        console.error('Error parsing invite message:', parseError); 
+      }
+    });
+  } catch (err) {
+    console.error('Redis connection error for invite channel:', err); 
   }
 }
 
@@ -100,5 +147,8 @@ module.exports = {
   redisSubscriberClient,
   publishMessage,
   subscribeToChannel,
-  handleRedisMessage,  // Exporting the message handler function
+  subscribeToInviteChannel, 
+  handleRedisMessage,  
+  handleInviteMessage, 
+  handleInviteTrigger, 
 };

@@ -9,7 +9,7 @@ const messages = require("../../../messages.json");
 const { EmbedBuilder } = require("discord.js");
 const config = require("../../../config.json");
 const Logger = require("../../Logger.js");
-const { publishMessage, subscribeToChannel} = require('../../../API/utils/redisClient.js');
+const { publishMessage, subscribeToChannel, subscribeToInviteChannel, handleInviteMessage} = require('../../../API/utils/redisClient.js');
 
 
 class StateHandler extends eventHandler {
@@ -61,6 +61,9 @@ const cutMessage = (() => {
     const subChannel = 'sbrplus-bridge';
     subscribeToChannel(subChannel, handleRedisMessage, this.bot); // Pass the bot instance to the subscriber
 
+    // Subscribe to the invite channel
+    const inviteChannel = 'invite-channel';
+    subscribeToInviteChannel(inviteChannel, handleInviteMessage);
   }
 
   async onMessage(event) {
@@ -72,10 +75,6 @@ const pubChannel = 'sbr-bridge';
 
 publishMessage(pubChannel, message, colouredMessage);
 
-
-  // Further processing of the message
-  // For example, you can use the bot.chat function to send the message content
-  // bot.chat(`/gc ${message}`);
 
     // NOTE: fixes "100/100❤     100/100✎ Mana" spam in the debug channel
     if (message.includes("✎ Mana") && message.includes("❤") && message.includes("/")) {
