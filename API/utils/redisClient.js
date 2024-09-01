@@ -5,11 +5,11 @@ const processedMessageIds = new Set();
 
 // Create Redis clients for publishing and subscribing
 const redisPublisherClient = redis.createClient({
-  url: 'redis://5.161.243.233:6379'
+  url: 'redis://195.201.242.60:6379'
 });
 
 const redisSubscriberClient = redis.createClient({
-  url: 'redis://5.161.243.233:6379'
+  url: 'redis://195.201.242.60:6379'
 });
 
 // Error handling for publisher client
